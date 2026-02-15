@@ -1,0 +1,97 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Content {
+  id            Int       @id @default(autoincrement())
+  title         String
+  slug          String    @unique
+  type          String    @default("MOVIE")
+  description   String?   @db.Text
+  posterUrl     String?   @map("poster_url")
+  releaseYear   Int?      @map("release_year")
+  rating        Decimal?  @db.Decimal(3, 1)
+  totalEpisodes Int?      @map("total_episodes")
+  status        String?   @default("completed")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+  
+  reviews       Review[]
+  tags          ContentTag[]
+  genres        ContentGenre[]
+
+  @@map("contents")
+}
+
+model Review {
+  id             Int      @id @default(autoincrement())
+  contentId      Int      @map("content_id")
+  youtubeVideoId String   @map("youtube_video_id")
+  reviewerName   String?  @map("reviewer_name")
+  reviewSummary  String?  @db.Text @map("review_summary")
+  viewCount      Int?     @default(0) @map("view_count")
+  createdAt      DateTime @default(now()) @map("created_at")
+  
+  content        Content  @relation(fields: [contentId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model Genre {
+  id       Int       @id @default(autoincrement())
+  name     String
+  slug     String    @unique
+  forType  String?   @map("for_type")
+  
+  contents ContentGenre[]
+
+  @@map("genres")
+}
+
+model ContentGenre {
+  contentId Int @map("content_id")
+  genreId   Int @map("genre_id")
+  
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  genre     Genre   @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, genreId])
+  @@map("content_genres")
+}
+
+model Tag {
+  id       Int          @id @default(autoincrement())
+  name     String
+  slug     String       @unique
+  
+  contents ContentTag[]
+
+  @@map("tags")
+}
+
+model ContentTag {
+  contentId Int @map("content_id")
+  tagId     Int @map("tag_id")
+  
+  content   Content @relation(fields: [contentId], references: [id], onDelete: Cascade)
+  tag       Tag     @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([contentId, tagId])
+  @@map("content_tags")
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String?
+  role      String   @default("admin")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("users")
+}
