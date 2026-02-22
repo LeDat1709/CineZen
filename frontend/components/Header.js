@@ -1,12 +1,72 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 
 export default function Header() {
   const [showGenreMenu, setShowGenreMenu] = useState(false)
+  const [showCountryMenu, setShowCountryMenu] = useState(false)
+  const [showYearMenu, setShowYearMenu] = useState(false)
   const [movieGenres, setMovieGenres] = useState([])
   const [seriesGenres, setSeriesGenres] = useState([])
+  
+  // Timeout refs for delayed close
+  const genreTimeoutRef = useRef(null)
+  const countryTimeoutRef = useRef(null)
+  const yearTimeoutRef = useRef(null)
+
+  // Popular countries
+  const countries = [
+    { name: 'Việt Nam', slug: 'viet-nam' },
+    { name: 'Hàn Quốc', slug: 'han-quoc' },
+    { name: 'Trung Quốc', slug: 'trung-quoc' },
+    { name: 'Nhật Bản', slug: 'nhat-ban' },
+    { name: 'Thái Lan', slug: 'thai-lan' },
+    { name: 'Mỹ', slug: 'my' },
+    { name: 'Anh', slug: 'anh' },
+    { name: 'Pháp', slug: 'phap' },
+    { name: 'Ấn Độ', slug: 'an-do' },
+    { name: 'Đài Loan', slug: 'dai-loan' },
+    { name: 'Hồng Kông', slug: 'hong-kong' },
+    { name: 'Philippines', slug: 'philippines' }
+  ]
+
+  // Recent years
+  const currentYear = new Date().getFullYear()
+  const years = Array.from({ length: 10 }, (_, i) => currentYear - i)
+
+  const handleGenreMouseEnter = () => {
+    if (genreTimeoutRef.current) clearTimeout(genreTimeoutRef.current)
+    setShowGenreMenu(true)
+  }
+
+  const handleGenreMouseLeave = () => {
+    genreTimeoutRef.current = setTimeout(() => {
+      setShowGenreMenu(false)
+    }, 300)
+  }
+
+  const handleCountryMouseEnter = () => {
+    if (countryTimeoutRef.current) clearTimeout(countryTimeoutRef.current)
+    setShowCountryMenu(true)
+  }
+
+  const handleCountryMouseLeave = () => {
+    countryTimeoutRef.current = setTimeout(() => {
+      setShowCountryMenu(false)
+    }, 300)
+  }
+
+  const handleYearMouseEnter = () => {
+    if (yearTimeoutRef.current) clearTimeout(yearTimeoutRef.current)
+    setShowYearMenu(true)
+  }
+
+  const handleYearMouseLeave = () => {
+    yearTimeoutRef.current = setTimeout(() => {
+      setShowYearMenu(false)
+    }, 300)
+  }
 
   useEffect(() => {
     fetchGenres()
@@ -33,11 +93,12 @@ export default function Header() {
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-500 rounded flex items-center justify-center">
-              <span className="text-xl">🎬</span>
-            </div>
-            <span className="text-xl font-bold">CineZen</span>
+          <Link href="/" className="flex items-center space-x-3">
+            <img 
+              src="https://cdzhcgozjilldlpngapi.supabase.co/storage/v1/object/public/Image/Logo/logonew.png" 
+              alt="ReviewPhim Logo" 
+              className="h-10 w-auto"
+            />
             <span className="text-xs text-gray-500">Review hay & chill</span>
           </Link>
 
@@ -56,8 +117,8 @@ export default function Header() {
             {/* Genre Mega Menu */}
             <div 
               className="relative"
-              onMouseEnter={() => setShowGenreMenu(true)}
-              onMouseLeave={() => setShowGenreMenu(false)}
+              onMouseEnter={handleGenreMouseEnter}
+              onMouseLeave={handleGenreMouseLeave}
             >
               <button className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-1">
                 Thể loại
@@ -105,6 +166,66 @@ export default function Header() {
                         ))}
                       </div>
                     </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Country Menu */}
+            <div 
+              className="relative"
+              onMouseEnter={handleCountryMouseEnter}
+              onMouseLeave={handleCountryMouseLeave}
+            >
+              <button className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-1">
+                Quốc gia
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showCountryMenu && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#1a1a1a] border border-gray-800 rounded-lg shadow-2xl p-6 w-[400px]">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    {countries.map(country => (
+                      <Link
+                        key={country.slug}
+                        href={`/movies?country=${country.slug}`}
+                        className="block text-sm text-gray-400 hover:text-yellow-500 transition-colors py-1.5"
+                      >
+                        {country.name}
+                      </Link>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Year Menu */}
+            <div 
+              className="relative"
+              onMouseEnter={handleYearMouseEnter}
+              onMouseLeave={handleYearMouseLeave}
+            >
+              <button className="text-gray-300 hover:text-white transition-colors text-sm flex items-center gap-1">
+                Năm phát hành
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+
+              {showYearMenu && (
+                <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 bg-[#1a1a1a] border border-gray-800 rounded-lg shadow-2xl p-6 w-[300px]">
+                  <div className="grid grid-cols-2 gap-x-6 gap-y-2">
+                    {years.map(year => (
+                      <Link
+                        key={year}
+                        href={`/movies?year=${year}`}
+                        className="block text-sm text-gray-400 hover:text-yellow-500 transition-colors py-1.5"
+                      >
+                        {year}
+                      </Link>
+                    ))}
                   </div>
                 </div>
               )}

@@ -21,7 +21,8 @@ export default function MoviesPage() {
     genre: genreFromUrl || null,
     year: null,
     rating: null,
-    sortBy: 'latest'
+    sortBy: 'latest',
+    country: null
   })
   
   // Temp filters for modal
@@ -34,16 +35,43 @@ export default function MoviesPage() {
   const currentYear = new Date().getFullYear()
   const years = Array.from({ length: currentYear - 1949 }, (_, i) => currentYear - i)
 
+  // Countries list
+  const countries = [
+    { name: 'Việt Nam', slug: 'viet-nam' },
+    { name: 'Hàn Quốc', slug: 'han-quoc' },
+    { name: 'Trung Quốc', slug: 'trung-quoc' },
+    { name: 'Nhật Bản', slug: 'nhat-ban' },
+    { name: 'Thái Lan', slug: 'thai-lan' },
+    { name: 'Mỹ', slug: 'my' },
+    { name: 'Anh', slug: 'anh' },
+    { name: 'Pháp', slug: 'phap' },
+    { name: 'Ấn Độ', slug: 'an-do' },
+    { name: 'Đài Loan', slug: 'dai-loan' },
+    { name: 'Hồng Kông', slug: 'hong-kong' },
+    { name: 'Philippines', slug: 'philippines' }
+  ]
+
   useEffect(() => {
     fetchGenres()
   }, [])
 
   useEffect(() => {
-    if (genreFromUrl) {
-      setFilters(prev => ({ ...prev, genre: genreFromUrl }))
-      setTempFilters(prev => ({ ...prev, genre: genreFromUrl }))
+    // Read URL params and set filters on mount
+    const yearFromUrl = searchParams.get('year')
+    const countryFromUrl = searchParams.get('country')
+    const sortFromUrl = searchParams.get('sort')
+    
+    const urlFilters = {
+      genre: genreFromUrl || null,
+      year: yearFromUrl || null,
+      country: countryFromUrl || null,
+      rating: null,
+      sortBy: sortFromUrl || 'latest'
     }
-  }, [genreFromUrl])
+    
+    setFilters(urlFilters)
+    setTempFilters(urlFilters)
+  }, [genreFromUrl, searchParams])
 
   useEffect(() => {
     fetchContents()
@@ -69,6 +97,7 @@ export default function MoviesPage() {
       if (filters.year) url += `&year=${filters.year}`
       if (filters.rating) url += `&minRating=${filters.rating}`
       if (filters.sortBy) url += `&sort=${filters.sortBy}`
+      if (filters.country) url += `&country=${filters.country}`
 
       const response = await fetch(url)
       const data = await response.json()
@@ -92,7 +121,8 @@ export default function MoviesPage() {
       genre: null,
       year: null,
       rating: null,
-      sortBy: 'latest'
+      sortBy: 'latest',
+      country: null
     }
     setTempFilters(resetFilters)
     setFilters(resetFilters)
@@ -106,6 +136,7 @@ export default function MoviesPage() {
     if (filters.year) count++
     if (filters.rating) count++
     if (filters.sortBy !== 'latest') count++
+    if (filters.country) count++
     return count
   }
 
@@ -138,7 +169,7 @@ export default function MoviesPage() {
         {/* Filter Panel */}
         {showFilter && (
           <div className="mb-6 mx-2 p-6 bg-gray-800/30 backdrop-blur-sm rounded-lg border border-gray-700/50">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-6">
               {/* Genre Filter */}
               <div>
                 <label className="block text-white font-medium mb-3">Thể loại</label>
@@ -151,6 +182,22 @@ export default function MoviesPage() {
                   <option value="">Tất cả</option>
                   {genres.map(genre => (
                     <option key={genre.id} value={genre.slug}>{genre.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Country Filter */}
+              <div>
+                <label className="block text-white font-medium mb-3">Quốc gia</label>
+                <select
+                  value={tempFilters.country || ''}
+                  onChange={(e) => setTempFilters({ ...tempFilters, country: e.target.value || null })}
+                  className="w-full px-4 py-2.5 bg-gray-900/50 text-white rounded-lg border border-gray-700 focus:border-purple-500 focus:outline-none appearance-none cursor-pointer"
+                  style={{ backgroundImage: 'none' }}
+                >
+                  <option value="">Tất cả</option>
+                  {countries.map(country => (
+                    <option key={country.slug} value={country.slug}>{country.name}</option>
                   ))}
                 </select>
               </div>

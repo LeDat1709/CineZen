@@ -1,7 +1,7 @@
 import './globals.css'
 
 export const metadata = {
-  title: 'CineZen - Thế giới Review Phim & Truyện',
+  title: 'ReviewPhim - Thế giới Review Phim & Truyện',
   description: 'Khám phá thế giới điện ảnh qua những review chất lượng. Nơi bạn đắm chìm vào câu chuyện sau giờ học, giờ làm.',
 }
 

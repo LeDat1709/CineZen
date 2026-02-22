@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
 
 export default function HeroBanner() {
   const [featured, setFeatured] = useState([])
@@ -41,102 +40,142 @@ export default function HeroBanner() {
   const current = featured[currentIndex]
 
   return (
-    <div className="relative h-[500px] w-full overflow-hidden mb-8">
-      {/* Background Image with Overlay */}
-      <div className="absolute inset-0">
+    <div className="relative h-[600px] w-full overflow-hidden mb-8">
+      {/* Blurred Background - Only colors visible */}
+      <div className="absolute inset-0 bg-black">
         {current.posterUrl && (
-          <Image
-            src={current.posterUrl}
-            alt={current.title}
-            fill
-            className="object-cover"
-            priority
-          />
+          <>
+            {/* Blurred poster for color ambiance */}
+            <img
+              src={current.posterUrl}
+              alt={current.title}
+              className="w-full h-full object-cover scale-110"
+              style={{
+                filter: 'blur(60px) brightness(0.7) saturate(1.3)',
+              }}
+            />
+            {/* Dark overlay for better text contrast */}
+            <div className="absolute inset-0 bg-black/40"></div>
+          </>
         )}
-        {/* Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black via-black/80 to-transparent"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#151515] via-transparent to-transparent"></div>
       </div>
 
       {/* Content */}
       <div className="relative h-full container mx-auto px-4 flex items-center">
-        <div className="max-w-2xl">
+        <div className="max-w-3xl">
           {/* Title */}
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-2xl">
+          <h1 className="text-5xl md:text-6xl font-bold mb-6 text-white drop-shadow-2xl leading-tight">
             {current.title}
           </h1>
 
           {/* Meta Info */}
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-4 mb-6">
             {current.releaseYear && (
-              <span className="text-gray-300 text-base">
+              <span className="text-yellow-400 font-semibold text-lg">
                 {current.releaseYear}
               </span>
+            )}
+            {current.rating && (
+              <>
+                <span className="text-gray-500">•</span>
+                <span className="text-yellow-400 font-semibold text-lg">
+                  {current.rating}/10
+                </span>
+              </>
             )}
             {current.genres && current.genres.length > 0 && (
               <>
                 <span className="text-gray-500">•</span>
-                <span className="text-gray-300 text-base">
-                  {current.genres.map(cg => cg.genre.name).join(', ')}
-                </span>
+                <div className="flex gap-2">
+                  {current.genres.slice(0, 3).map(cg => (
+                    <span 
+                      key={cg.genre.id}
+                      className="px-3 py-1 bg-white/10 backdrop-blur-sm text-white text-sm rounded-full border border-white/20"
+                    >
+                      {cg.genre.name}
+                    </span>
+                  ))}
+                </div>
               </>
             )}
           </div>
 
-          {/* Action Button */}
-          <Link
-            href={`/contents/${current.slug}`}
-            className="inline-flex items-center gap-2 bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-md transition-all hover:scale-105"
-          >
-            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-            Xem ngay
-          </Link>
+          {/* Description */}
+          {current.description && (
+            <p className="text-gray-200 text-lg mb-8 line-clamp-3 leading-relaxed max-w-2xl">
+              {current.description}
+            </p>
+          )}
+
+          {/* Action Buttons - No Icons */}
+          <div className="flex gap-4">
+            <Link
+              href={`/contents/${current.slug}`}
+              className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold px-10 py-4 rounded-lg transition-all hover:scale-105 shadow-lg"
+            >
+              Xem ngay
+            </Link>
+            <Link
+              href={`/contents/${current.slug}`}
+              className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-lg transition-all border border-white/30"
+            >
+              Chi tiết
+            </Link>
+          </div>
         </div>
       </div>
 
       {/* Thumbnail Navigation */}
-      <div className="absolute bottom-6 right-6 flex gap-2">
+      <div className="absolute bottom-8 right-8 flex gap-3">
         {featured.map((item, index) => (
           <button
             key={item.id}
             onClick={() => setCurrentIndex(index)}
-            className={`relative w-16 h-20 rounded overflow-hidden transition-all ${
+            className={`relative w-20 h-28 rounded-lg overflow-hidden transition-all ${
               index === currentIndex 
-                ? 'ring-2 ring-yellow-500 scale-110' 
-                : 'opacity-60 hover:opacity-100'
+                ? 'ring-4 ring-yellow-500 scale-110 shadow-2xl' 
+                : 'opacity-50 hover:opacity-100 hover:scale-105'
             }`}
           >
             {item.posterUrl && (
-              <Image
+              <img
                 src={item.posterUrl}
                 alt={item.title}
-                fill
-                className="object-cover"
+                className="w-full h-full object-cover"
               />
             )}
           </button>
         ))}
       </div>
 
-      {/* Navigation Arrows */}
+      {/* Navigation Arrows - Simple, No Icons */}
       <button
         onClick={() => setCurrentIndex((prev) => (prev - 1 + featured.length) % featured.length)}
-        className="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+        className="absolute left-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center transition-all hover:scale-110 border border-white/20 text-white text-2xl font-light"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-        </svg>
+        ‹
       </button>
       <button
         onClick={() => setCurrentIndex((prev) => (prev + 1) % featured.length)}
-        className="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 bg-black/50 hover:bg-black/70 rounded-full flex items-center justify-center transition-colors"
+        className="absolute right-6 top-1/2 -translate-y-1/2 w-14 h-14 bg-black/60 hover:bg-black/80 backdrop-blur-sm rounded-full flex items-center justify-center transition-all hover:scale-110 border border-white/20 text-white text-2xl font-light"
       >
-        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
+        ›
       </button>
+
+      {/* Progress Indicator */}
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex gap-2">
+        {featured.map((_, index) => (
+          <button
+            key={index}
+            onClick={() => setCurrentIndex(index)}
+            className={`h-1 rounded-full transition-all ${
+              index === currentIndex 
+                ? 'w-12 bg-yellow-500' 
+                : 'w-8 bg-white/30 hover:bg-white/50'
+            }`}
+          />
+        ))}
+      </div>
     </div>
   )
 }

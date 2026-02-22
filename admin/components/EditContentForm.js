@@ -9,10 +9,12 @@ export default function EditContentForm({ contentId, onSuccess }) {
     description: '',
     posterUrl: '',
     releaseYear: '',
-    rating: ''
+    rating: '',
+    country: ''
   })
   const [selectedGenres, setSelectedGenres] = useState([])
   const [genres, setGenres] = useState([])
+  const [reviews, setReviews] = useState([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [imagePreview, setImagePreview] = useState(null)
@@ -43,13 +45,19 @@ export default function EditContentForm({ contentId, onSuccess }) {
         description: data.description || '',
         posterUrl: data.posterUrl || '',
         releaseYear: data.releaseYear || '',
-        rating: data.rating || ''
+        rating: data.rating || '',
+        country: data.country || ''
       })
       
       // Extract genre IDs from the genres array
       if (data.genres && data.genres.length > 0) {
         const genreIds = data.genres.map(cg => cg.genre.id)
         setSelectedGenres(genreIds)
+      }
+      
+      // Set reviews
+      if (data.reviews && data.reviews.length > 0) {
+        setReviews(data.reviews)
       }
       
       setImagePreview(data.posterUrl)
@@ -104,6 +112,60 @@ export default function EditContentForm({ contentId, onSuccess }) {
       alert('Lỗi khi upload ảnh')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const addReview = async (videoId) => {
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/reviews`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          contentId: parseInt(contentId),
+          youtubeVideoId: videoId,
+          reviewerName: 'Manual Added'
+        })
+      })
+
+      if (response.ok) {
+        const newReview = await response.json()
+        setReviews([...reviews, newReview])
+        alert('✅ Đã thêm review!')
+      } else {
+        alert('❌ Không thể thêm review')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('❌ Lỗi khi thêm review')
+    }
+  }
+
+  const deleteReview = async (reviewId) => {
+    if (!confirm('Bạn có chắc muốn xóa review này?')) return
+
+    try {
+      const token = localStorage.getItem('token')
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/admin/reviews/${reviewId}`,
+        {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        }
+      )
+
+      if (response.ok) {
+        setReviews(reviews.filter(r => r.id !== reviewId))
+        alert('✅ Đã xóa review!')
+      } else {
+        alert('❌ Không thể xóa review')
+      }
+    } catch (error) {
+      console.error('Error:', error)
+      alert('❌ Lỗi khi xóa review')
     }
   }
 
@@ -276,8 +338,8 @@ export default function EditContentForm({ contentId, onSuccess }) {
           />
         </div>
 
-        {/* Year and Rating */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Year, Country and Rating */}
+        <div className="grid grid-cols-3 gap-4">
           <div>
             <label className="block mb-2 font-semibold">Năm phát hành</label>
             <input
@@ -286,6 +348,28 @@ export default function EditContentForm({ contentId, onSuccess }) {
               onChange={(e) => setFormData({...formData, releaseYear: e.target.value})}
               className="w-full px-4 py-2 border rounded"
             />
+          </div>
+          <div>
+            <label className="block mb-2 font-semibold">Quốc gia</label>
+            <select
+              value={formData.country || ''}
+              onChange={(e) => setFormData({...formData, country: e.target.value})}
+              className="w-full px-4 py-2 border rounded"
+            >
+              <option value="">Chọn quốc gia</option>
+              <option value="viet-nam">🇻🇳 Việt Nam</option>
+              <option value="han-quoc">🇰🇷 Hàn Quốc</option>
+              <option value="trung-quoc">🇨🇳 Trung Quốc</option>
+              <option value="nhat-ban">🇯🇵 Nhật Bản</option>
+              <option value="thai-lan">🇹🇭 Thái Lan</option>
+              <option value="my">🇺🇸 Mỹ</option>
+              <option value="anh">🇬🇧 Anh</option>
+              <option value="phap">🇫🇷 Pháp</option>
+              <option value="an-do">🇮🇳 Ấn Độ</option>
+              <option value="dai-loan">🇹🇼 Đài Loan</option>
+              <option value="hong-kong">🇭🇰 Hồng Kông</option>
+              <option value="philippines">🇵🇭 Philippines</option>
+            </select>
           </div>
           <div>
             <label className="block mb-2 font-semibold">Đánh giá (0-10)</label>
@@ -298,6 +382,117 @@ export default function EditContentForm({ contentId, onSuccess }) {
               onChange={(e) => setFormData({...formData, rating: e.target.value})}
               className="w-full px-4 py-2 border rounded"
             />
+          </div>
+        </div>
+
+        {/* Reviews Management */}
+        <div className="mb-6 p-6 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border-2 border-blue-200">
+          <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <span>🎥</span> Quản lý Reviews ({reviews.length})
+          </h3>
+          
+          {/* Current Reviews */}
+          {reviews.length > 0 && (
+            <div className="mb-4 space-y-2">
+              {reviews.map(review => (
+                <div key={review.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
+                  <div className="flex items-center gap-3">
+                    <img 
+                      src={`https://img.youtube.com/vi/${review.youtubeVideoId}/default.jpg`}
+                      alt="Thumbnail"
+                      className="w-20 h-14 object-cover rounded"
+                    />
+                    <div>
+                      <p className="font-medium text-gray-800">{review.reviewerName || 'Unknown'}</p>
+                      <a 
+                        href={`https://youtube.com/watch?v=${review.youtubeVideoId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        {review.youtubeVideoId}
+                      </a>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => deleteReview(review.id)}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded transition-colors"
+                  >
+                    Xóa
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Add New Review */}
+          <div className="bg-white p-4 rounded-lg border-2 border-dashed border-blue-300">
+            <h4 className="font-semibold text-gray-700 mb-2">Thêm review mới</h4>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                placeholder="Nhập link YouTube hoặc Video ID"
+                className="flex-1 px-4 py-2 border-2 border-blue-300 rounded-lg focus:border-blue-500 focus:outline-none"
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    const input = e.target
+                    const url = input.value.trim()
+                    if (url) {
+                      let videoId = null
+                      try {
+                        const urlObj = new URL(url)
+                        if (urlObj.hostname.includes('youtube.com')) {
+                          videoId = urlObj.searchParams.get('v')
+                        } else if (urlObj.hostname.includes('youtu.be')) {
+                          videoId = urlObj.pathname.slice(1)
+                        }
+                      } catch (e) {
+                        if (url.length === 11) videoId = url
+                      }
+                      
+                      if (videoId) {
+                        addReview(videoId)
+                        input.value = ''
+                      } else {
+                        alert('❌ Link YouTube không hợp lệ!')
+                      }
+                    }
+                  }
+                }}
+              />
+              <button
+                onClick={(e) => {
+                  const input = e.target.parentElement.querySelector('input')
+                  const url = input.value.trim()
+                  if (url) {
+                    let videoId = null
+                    try {
+                      const urlObj = new URL(url)
+                      if (urlObj.hostname.includes('youtube.com')) {
+                        videoId = urlObj.searchParams.get('v')
+                      } else if (urlObj.hostname.includes('youtu.be')) {
+                        videoId = urlObj.pathname.slice(1)
+                      }
+                    } catch (e) {
+                      if (url.length === 11) videoId = url
+                    }
+                    
+                    if (videoId) {
+                      addReview(videoId)
+                      input.value = ''
+                    } else {
+                      alert('❌ Link YouTube không hợp lệ!')
+                    }
+                  }
+                }}
+                className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors"
+              >
+                Thêm
+              </button>
+            </div>
+            <p className="text-xs text-gray-600 mt-2">
+              💡 Nhấn Enter hoặc click "Thêm" để thêm review
+            </p>
           </div>
         </div>
 

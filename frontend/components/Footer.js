@@ -5,10 +5,11 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <div className="flex items-center space-x-3 mb-4">
-              <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-500 rounded-lg flex items-center justify-center">
-                <span className="text-2xl">🎬</span>
-              </div>
-              <h3 className="font-bold text-xl gradient-text">CineZen</h3>
+              <img 
+                src="https://cdzhcgozjilldlpngapi.supabase.co/storage/v1/object/public/Image/Logo/logonew.png" 
+                alt="ReviewPhim Logo" 
+                className="h-12 w-auto"
+              />
             </div>
             <p className="text-gray-400">
               Thế giới review phim & truyện. Nơi bạn đắm chìm vào câu chuyện sau giờ học, giờ làm.
@@ -43,7 +44,7 @@ export default function Footer() {
         </div>
         
         <div className="border-t border-white/10 mt-8 pt-8 text-center text-gray-400">
-          <p>&copy; 2026 CineZen. Thế giới review phim & truyện của bạn.</p>
+          <p>&copy; 2026 ReviewPhim. Thế giới review phim & truyện của bạn.</p>
         </div>
       </div>
     </footer>
