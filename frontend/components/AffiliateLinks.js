@@ -2,7 +2,7 @@
 
 import Image from 'next/image'
 
-export default function AffiliateLinks({ content }) {
+export default function AffiliateLinks({ content, compact = false }) {
   const streamingPlatforms = [
     {
       name: 'Clip TV',
@@ -29,6 +29,38 @@ export default function AffiliateLinks({ content }) {
       affiliateParam: '?ref=cinezen'
     }
   ]
+
+  if (compact) {
+    return (
+      <div className="bg-gradient-to-r from-[#1a0a2e]/30 to-[#0f0520]/30 border border-[#2a1a4e]/30 rounded-lg p-4">
+        <p className="text-gray-300 text-sm text-center mb-3">
+          Xem chất lượng cao trên
+        </p>
+        <div className="flex justify-center gap-3">
+          {streamingPlatforms.map((platform) => (
+            <a
+              key={platform.name}
+              href={`${platform.url}${platform.affiliateParam}`}
+              target="_blank"
+              rel="noopener noreferrer sponsored"
+              className="bg-white/10 backdrop-blur-sm rounded-lg p-2 hover:bg-white/20 hover:scale-105 transition-all duration-300 border border-white/10"
+              title={platform.name}
+            >
+              <div className="relative w-12 h-12 flex items-center justify-center">
+                <Image
+                  src={platform.logo}
+                  alt={platform.name}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              </div>
+            </a>
+          ))}
+        </div>
+      </div>
+    )
+  }
   
   return (
     <div className="mt-6 space-y-4">

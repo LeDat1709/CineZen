@@ -16,8 +16,8 @@ export default function HomeMovies() {
   const fetchData = async () => {
     try {
       const [topRes, latestRes] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/contents/top-rated?type=MOVIE&limit=12`),
-        fetch(`${process.env.NEXT_PUBLIC_API_URL}/contents/latest?type=MOVIE&limit=12`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/contents/top-rated?type=MOVIE&limit=6`),
+        fetch(`${process.env.NEXT_PUBLIC_API_URL}/contents/latest?type=MOVIE&limit=6`)
       ])
 
       const topData = await topRes.json()
@@ -60,8 +60,13 @@ export default function HomeMovies() {
       {/* Top Rated Movies */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-300">⭐ Top Phim Hay Nhất</h3>
-          <span className="text-xs text-gray-500">Dựa trên đánh giá</span>
+          <h3 className="text-lg font-semibold text-gray-300">Top Phim Hay Nhất</h3>
+          <Link 
+            href="/movies?sort=rating" 
+            className="text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
+          >
+            Xem thêm →
+          </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {topRated.map(content => (
@@ -73,8 +78,13 @@ export default function HomeMovies() {
       {/* Latest Movies */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-300">🆕 Phim Mới Cập Nhật</h3>
-          <span className="text-xs text-gray-500">Mới nhất</span>
+          <h3 className="text-lg font-semibold text-gray-300">Phim Mới Cập Nhật</h3>
+          <Link 
+            href="/movies?sort=latest" 
+            className="text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
+          >
+            Xem thêm →
+          </Link>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
           {latest.map(content => (

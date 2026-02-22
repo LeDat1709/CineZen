@@ -1,12 +1,13 @@
 -- CineZen Database Schema
 -- PostgreSQL
 -- Hỗ trợ cả Phim (MOVIE) và Truyện (SERIES)
+-- Đồng bộ với Prisma Schema
 
 -- ============================================
 -- Bước 1: Tạo database (chạy riêng nếu chưa có)
 -- ============================================
--- CREATE DATABASE movie_reviews;
--- \c movie_reviews;
+-- CREATE DATABASE cinezen;
+-- \c cinezen;
 
 -- ============================================
 -- Bước 2: Tạo các bảng
@@ -17,16 +18,14 @@ CREATE TABLE genres (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(100) UNIQUE NOT NULL,
-    for_type VARCHAR(20),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    for_type VARCHAR(20)
 );
 
 -- Bảng Tags (Nhãn)
 CREATE TABLE tags (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
-    slug VARCHAR(100) UNIQUE NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    slug VARCHAR(100) UNIQUE NOT NULL
 );
 
 -- Bảng Contents (Phim và Truyện)
@@ -37,13 +36,23 @@ CREATE TABLE contents (
     type VARCHAR(20) DEFAULT 'MOVIE',
     description TEXT,
     poster_url VARCHAR(500),
+    backdrop_url VARCHAR(500),
     release_year INTEGER,
     rating DECIMAL(3,1) CHECK (rating >= 0 AND rating <= 10),
     total_episodes INTEGER,
     status VARCHAR(50) DEFAULT 'completed',
+    country VARCHAR(100),
+    views INTEGER DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+-- Indexes for better performance
+CREATE INDEX idx_contents_views ON contents(views);
+CREATE INDEX idx_contents_created_at ON contents(created_at);
+CREATE INDEX idx_contents_slug ON contents(slug);
+CREATE INDEX idx_contents_type ON contents(type);
+CREATE INDEX idx_contents_country ON contents(country);
 
 -- Bảng Reviews (Video review từ YouTube)
 CREATE TABLE reviews (
@@ -56,18 +65,18 @@ CREATE TABLE reviews (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Bảng Content_Tags (Quan hệ nhiều-nhiều)
-CREATE TABLE content_tags (
-    content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE,
-    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
-    PRIMARY KEY (content_id, tag_id)
-);
-
 -- Bảng Content_Genres (Quan hệ nhiều-nhiều cho thể loại)
 CREATE TABLE content_genres (
     content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE,
     genre_id INTEGER NOT NULL REFERENCES genres(id) ON DELETE CASCADE,
     PRIMARY KEY (content_id, genre_id)
+);
+
+-- Bảng Content_Tags (Quan hệ nhiều-nhiều)
+CREATE TABLE content_tags (
+    content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE,
+    tag_id INTEGER NOT NULL REFERENCES tags(id) ON DELETE CASCADE,
+    PRIMARY KEY (content_id, tag_id)
 );
 
 -- Bảng Users (Tài khoản admin)
@@ -81,10 +90,8 @@ CREATE TABLE users (
 );
 
 -- ============================================
--- Bước 3: Tạo indexes để tăng tốc truy vấn
+-- Bước 3: Tạo indexes bổ sung
 -- ============================================
-CREATE INDEX idx_contents_slug ON contents(slug);
-CREATE INDEX idx_contents_type ON contents(type);
 CREATE INDEX idx_reviews_content ON reviews(content_id);
 CREATE INDEX idx_genres_slug ON genres(slug);
 CREATE INDEX idx_tags_slug ON tags(slug);

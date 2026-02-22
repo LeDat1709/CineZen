@@ -6,6 +6,7 @@ const {
   getSeries,
   getTopRated,
   getLatest,
+  getTrending,
   getByGenre
 } = require('../controllers/contentController');
 
@@ -72,7 +73,7 @@ router.get('/top-rated', getTopRated);
  * @swagger
  * /api/contents/latest:
  *   get:
- *     summary: Lấy nội dung mới nhất (theo năm phát hành)
+ *     summary: Lấy nội dung mới nhất (theo ngày thêm vào database)
  *     tags: [Contents]
  *     parameters:
  *       - in: query
@@ -90,6 +91,29 @@ router.get('/top-rated', getTopRated);
  *         description: Nội dung mới nhất
  */
 router.get('/latest', getLatest);
+
+/**
+ * @swagger
+ * /api/contents/trending:
+ *   get:
+ *     summary: Lấy nội dung trending (7 ngày gần đây + rating cao)
+ *     tags: [Contents]
+ *     parameters:
+ *       - in: query
+ *         name: type
+ *         schema:
+ *           type: string
+ *           enum: [MOVIE, SERIES]
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 10
+ *     responses:
+ *       200:
+ *         description: Nội dung trending
+ */
+router.get('/trending', getTrending);
 
 /**
  * @swagger

@@ -1,23 +1,26 @@
 import Link from 'next/link'
-import Image from 'next/image'
+import { useState } from 'react'
 
 export default function ContentCard({ content }) {
+  const [imageError, setImageError] = useState(false)
+
   return (
     <Link href={`/contents/${content.slug}`}>
       <div className="group cursor-pointer">
         {/* Poster Image */}
         <div className="relative aspect-[2/3] overflow-hidden rounded-md bg-gray-900 mb-2">
-          {content.posterUrl ? (
-            <Image
+          {content.posterUrl && !imageError ? (
+            <img
               src={content.posterUrl}
               alt={content.title}
-              fill
-              className="object-cover transition-transform duration-300 group-hover:scale-105"
-              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 20vw"
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              onError={() => setImageError(true)}
             />
           ) : (
             <div className="w-full h-full bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
-              <div className="text-gray-600 text-sm">No Image</div>
+              <div className="text-gray-600 text-sm text-center px-2">
+                {imageError ? '🖼️' : 'No Image'}
+              </div>
             </div>
           )}
           

@@ -9,7 +9,8 @@ const nextConfig = {
       'images.fptplay53.net',
       'play-lh.googleusercontent.com',
       'assets.glxplay.io',
-      'statics.cdn.200lab.io'
+      'statics.cdn.200lab.io',
+      'truyenqq.com.vn'
     ],
   },
 }

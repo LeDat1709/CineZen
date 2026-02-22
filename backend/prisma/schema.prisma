@@ -14,10 +14,13 @@ model Content {
   type          String    @default("MOVIE")
   description   String?   @db.Text
   posterUrl     String?   @map("poster_url")
+  backdropUrl   String?   @map("backdrop_url")
   releaseYear   Int?      @map("release_year")
   rating        Decimal?  @db.Decimal(3, 1)
   totalEpisodes Int?      @map("total_episodes")
   status        String?   @default("completed")
+  country       String?
+  views         Int       @default(0)
   createdAt     DateTime  @default(now()) @map("created_at")
   updatedAt     DateTime  @updatedAt @map("updated_at")
   
@@ -25,6 +28,8 @@ model Content {
   tags          ContentTag[]
   genres        ContentGenre[]
 
+  @@index([views])
+  @@index([createdAt])
   @@map("contents")
 }
 

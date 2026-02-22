@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import Image from 'next/image'
 import YouTubeEmbed from './YouTubeEmbed'
 import AffiliateLinks from './AffiliateLinks'
 import InArticleAd from './InArticleAd'
@@ -9,6 +8,7 @@ import InArticleAd from './InArticleAd'
 export default function ContentDetail({ slug }) {
   const [content, setContent] = useState(null)
   const [loading, setLoading] = useState(true)
+  const [imageError, setImageError] = useState(false)
 
   useEffect(() => {
     fetchContent()
@@ -30,38 +30,41 @@ export default function ContentDetail({ slug }) {
   if (!content) return <div className="text-center py-12 text-white">Không tìm thấy nội dung</div>
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       {/* Hero Section */}
-      <div className="grid md:grid-cols-[300px_1fr] gap-8 mb-12">
-        {/* Poster */}
-        <div>
+      <div className="grid lg:grid-cols-[280px_1fr] gap-8 mb-8">
+        {/* Poster - Sticky */}
+        <div className="lg:sticky lg:top-24 lg:self-start">
           {content.posterUrl && (
-            <div className="sticky top-24">
-              <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-2xl">
-                <Image
+            <div className="relative aspect-[2/3] rounded-lg overflow-hidden shadow-2xl mb-4 bg-gray-900">
+              {!imageError ? (
+                <img
                   src={content.posterUrl}
                   alt={content.title}
-                  fill
-                  className="object-cover"
-                  priority
+                  className="w-full h-full object-cover"
+                  onError={() => setImageError(true)}
                 />
-              </div>
-              
-              {/* Affiliate Links */}
-              <div className="mt-6">
-                <AffiliateLinks content={content} />
-              </div>
+              ) : (
+                <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-gray-800 to-gray-900">
+                  <div className="text-gray-600 text-4xl">🖼️</div>
+                </div>
+              )}
             </div>
           )}
+          
+          {/* Affiliate Links - Sticky with poster */}
+          <div className="lg:sticky lg:top-[calc(24rem+6.5rem)]">
+            <AffiliateLinks content={content} />
+          </div>
         </div>
         
         {/* Info */}
         <div>
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-4 leading-tight">
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-4 leading-tight">
             {content.title}
           </h1>
           
-          <div className="flex items-center gap-4 mb-6 flex-wrap text-sm">
+          <div className="flex items-center gap-4 mb-4 flex-wrap text-sm">
             {content.releaseYear && (
               <span className="text-gray-400">{content.releaseYear}</span>
             )}
@@ -95,7 +98,7 @@ export default function ContentDetail({ slug }) {
 
           {/* Description */}
           {content.description && (
-            <div className="prose prose-invert max-w-none">
+            <div className="prose prose-invert max-w-none mb-8">
               <p className="text-gray-300 leading-relaxed text-base">
                 {content.description}
               </p>
@@ -104,15 +107,15 @@ export default function ContentDetail({ slug }) {
         </div>
       </div>
 
-      {/* In-Article Ad */}
-      <div className="mb-12">
+      {/* In-Article Ad - Before reviews */}
+      <div className="mb-8">
         <InArticleAd />
       </div>
 
       {/* Reviews Section */}
       {content.reviews && content.reviews.length > 0 && (
         <div>
-          <div className="mb-8">
+          <div className="mb-6">
             <h2 className="text-2xl font-bold text-white mb-2">Video Reviews</h2>
             <p className="text-gray-400 text-sm">
               {content.reviews.length} review{content.reviews.length > 1 ? 's' : ''} từ cộng đồng
@@ -136,7 +139,14 @@ export default function ContentDetail({ slug }) {
                   )}
                 </div>
 
-                {/* In-Article Ad between reviews */}
+                {/* Affiliate reminder after first review */}
+                {index === 0 && content.reviews.length > 1 && (
+                  <div className="my-8">
+                    <AffiliateLinks content={content} compact />
+                  </div>
+                )}
+
+                {/* In-Article Ad after 2nd review */}
                 {index === 1 && content.reviews.length > 2 && (
                   <div className="my-8">
                     <InArticleAd />
@@ -149,7 +159,7 @@ export default function ContentDetail({ slug }) {
       )}
 
       {/* Bottom Ad */}
-      <div className="mt-12">
+      <div className="mt-8">
         <InArticleAd position="bottom" />
       </div>
     </div>
