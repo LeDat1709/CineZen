@@ -29,11 +29,15 @@ app.use(compression());
 // CORS configuration
 const corsOptions = {
   origin: process.env.CORS_ORIGIN 
-    ? process.env.CORS_ORIGIN.split(',') 
+    ? process.env.CORS_ORIGIN.split(',').map(o => o.trim())
     : ['http://localhost:3000', 'http://localhost:3001'],
   credentials: true,
   optionsSuccessStatus: 200
 };
+
+// Log CORS origins for debugging
+console.log('🌐 CORS Origins:', corsOptions.origin);
+
 app.use(cors(corsOptions));
 
 // Rate limiting
