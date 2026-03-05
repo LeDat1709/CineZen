@@ -8,19 +8,21 @@ export default async function sitemap() {
       next: { revalidate: 3600 } // Revalidate every hour
     });
     if (response.ok) {
-      contents = await response.json();
+      const data = await response.json();
+      // Ensure data is an array
+      contents = Array.isArray(data) ? data : (data.contents || []);
     }
   } catch (error) {
     console.error('Error fetching contents for sitemap:', error);
   }
 
-  // Generate content URLs
-  const contentUrls = contents.map((content) => ({
+  // Generate content URLs - ensure contents is array
+  const contentUrls = Array.isArray(contents) ? contents.map((content) => ({
     url: `${baseUrl}/contents/${content.slug}`,
     lastModified: content.updatedAt || content.createdAt,
     changeFrequency: 'weekly',
     priority: 0.8,
-  }));
+  })) : [];
 
   // Static pages
   const staticPages = [
