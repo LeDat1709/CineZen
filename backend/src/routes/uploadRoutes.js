@@ -67,7 +67,10 @@ router.post('/poster', authMiddleware, upload.single('poster'), (req, res) => {
       return res.status(400).json({ error: 'Không có file được upload' });
     }
 
-    const fileUrl = `/uploads/${req.file.filename}`;
+    // Get base URL from environment or request
+    const baseUrl = process.env.BASE_URL || `${req.protocol}://${req.get('host')}`;
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    
     res.json({
       success: true,
       url: fileUrl,
