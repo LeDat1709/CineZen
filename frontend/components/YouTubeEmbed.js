@@ -1,4 +1,8 @@
 export default function YouTubeEmbed({ videoId }) {
+  if (!videoId) {
+    return null // Don't render if no video ID
+  }
+  
   return (
     <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>
       <iframe

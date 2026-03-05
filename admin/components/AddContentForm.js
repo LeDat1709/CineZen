@@ -1,6 +1,11 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import dynamic from 'next/dynamic'
+import 'react-quill/dist/quill.snow.css'
+
+// Import React Quill dynamically to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 
 export default function AddContentForm({ onSuccess }) {
   const [step, setStep] = useState(1)
@@ -12,6 +17,7 @@ export default function AddContentForm({ onSuccess }) {
   const [loadingMessage, setLoadingMessage] = useState('')
   const [genres, setGenres] = useState([])
   const [imagePreview, setImagePreview] = useState(null)
+  const [generatingAI, setGeneratingAI] = useState(false)
   const searchInputRef = useRef(null)
 
   // Validation helper
@@ -218,9 +224,10 @@ export default function AddContentForm({ onSuccess }) {
   }
 
   const saveContent = async () => {
+    // Video reviews are now optional
     if (selectedVideos.length === 0) {
-      alert('⚠️ Vui lòng chọn ít nhất 1 video review!')
-      return
+      const confirm = window.confirm('⚠️ Bạn chưa chọn video review nào. Bạn có muốn tiếp tục không?')
+      if (!confirm) return
     }
     
     setLoading(true)
@@ -251,21 +258,24 @@ export default function AddContentForm({ onSuccess }) {
 
       const content = await contentResponse.json()
       
-      setLoadingMessage(`📹 Đang lưu ${selectedVideos.length} video reviews...`)
+      // Only save video reviews if there are any selected
+      if (selectedVideos.length > 0) {
+        setLoadingMessage(`📹 Đang lưu ${selectedVideos.length} video reviews...`)
 
-      for (const video of selectedVideos) {
-        await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/reviews`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({
-            contentId: content.id,
-            youtubeVideoId: video.videoId,
-            reviewerName: video.channelTitle
+        for (const video of selectedVideos) {
+          await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/reviews`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({
+              contentId: content.id,
+              youtubeVideoId: video.videoId,
+              reviewerName: video.channelTitle
+            })
           })
-        })
+        }
       }
 
       setLoadingMessage('✅ Hoàn thành!')
@@ -278,6 +288,63 @@ export default function AddContentForm({ onSuccess }) {
       setLoadingMessage('')
     } finally {
       setLoading(false)
+    }
+  }
+
+  const generateAIReviewContent = async () => {
+    if (!contentData.title) {
+      alert('⚠️ Vui lòng nhập tên phim trước!')
+      return
+    }
+    
+    setGeneratingAI(true)
+    setLoadingMessage('🤖 AI đang viết review cho bạn...')
+    
+    try {
+      const token = localStorage.getItem('token')
+      
+      // Get genre names from selected IDs
+      const selectedGenreNames = genres
+        .filter(g => selectedGenres.includes(g.id))
+        .map(g => g.name)
+      
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/generate-ai-review`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          title: contentData.title,
+          type: contentData.type,
+          description: contentData.description,
+          releaseYear: contentData.releaseYear,
+          genres: selectedGenreNames,
+          rating: contentData.rating,
+          country: contentData.country
+        })
+      })
+      
+      const data = await response.json()
+      
+      if (data.success) {
+        setContentData({
+          ...contentData,
+          reviewContent: data.content
+        })
+        setLoadingMessage(`✅ Đã tạo ${data.wordCount} từ!`)
+        setTimeout(() => {
+          setLoadingMessage('')
+          alert('🎉 AI đã viết xong! Bạn có thể chỉnh sửa thêm nếu muốn.')
+        }, 1000)
+      } else {
+        throw new Error(data.error || 'Không thể tạo nội dung')
+      }
+    } catch (error) {
+      alert('❌ Lỗi khi tạo nội dung AI: ' + error.message)
+      setLoadingMessage('')
+    } finally {
+      setGeneratingAI(false)
     }
   }
 
@@ -353,7 +420,7 @@ export default function AddContentForm({ onSuccess }) {
       {step === 1 && (
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-2">🔍 Tìm kiếm phim/truyện</h2>
+            <h2 className="text-2xl font-bold text-gray-800 mb-2">🔍 Tìm kiếm phim/phim bộ</h2>
             <p className="text-gray-600">Nhập tên để tự động lấy thông tin từ OMDB</p>
           </div>
           
@@ -388,20 +455,20 @@ export default function AddContentForm({ onSuccess }) {
                     onChange={(e) => setContentData({...contentData, type: e.target.value})}
                     className="hidden"
                   />
-                  <span className="text-2xl">📚</span>
-                  <span className="font-semibold">Truyện/Series</span>
+                  <span className="text-2xl">�</span>
+                  <span className="font-semibold">Phim Bộ</span>
                 </label>
               </div>
             </div>
 
             <div className="mb-4">
               <label className="block mb-3 font-semibold text-gray-700">
-                Tên {contentData.type === 'MOVIE' ? 'phim' : 'truyện'}
+                Tên {contentData.type === 'MOVIE' ? 'phim' : 'phim bộ'}
               </label>
               <input
                 ref={searchInputRef}
                 type="text"
-                placeholder={`VD: ${contentData.type === 'MOVIE' ? 'Inception, Parasite, Avatar...' : 'Breaking Bad, Game of Thrones...'}`}
+                placeholder={`VD: ${contentData.type === 'MOVIE' ? 'Inception, Parasite, Avatar...' : 'Breaking Bad, Game of Thrones, Stranger Things...'}`}
                 className="w-full px-5 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-lg"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter' && e.target.value.trim()) {
@@ -418,7 +485,7 @@ export default function AddContentForm({ onSuccess }) {
                 if (inputValue) {
                   fetchFromOMDB(inputValue)
                 } else {
-                  alert('⚠️ Vui lòng nhập tên phim/truyện')
+                  alert('⚠️ Vui lòng nhập tên phim/phim bộ')
                 }
               }}
               disabled={loading}
@@ -467,13 +534,13 @@ export default function AddContentForm({ onSuccess }) {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-700">Tên phim/truyện</label>
+              <label className="block mb-2 font-semibold text-gray-700">Tên phim/phim bộ</label>
               <input
                 type="text"
                 value={contentData.title || ''}
                 onChange={(e) => setContentData({...contentData, title: e.target.value})}
                 className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none"
-                placeholder="Tên phim/truyện"
+                placeholder="Tên phim/phim bộ"
               />
             </div>
             
@@ -547,12 +614,12 @@ export default function AddContentForm({ onSuccess }) {
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold text-gray-700">Mô tả</label>
+              <label className="block mb-2 font-semibold text-gray-700">Mô tả ngắn</label>
               <textarea
                 value={contentData.description || ''}
                 onChange={(e) => setContentData({...contentData, description: e.target.value})}
-                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none h-32"
-                placeholder="Mô tả nội dung phim/truyện"
+                className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none h-24"
+                placeholder="Mô tả ngắn gọn về nội dung phim/phim bộ (2-3 câu)"
               />
               {contentData.descriptionEn && contentData.descriptionEn !== contentData.description && (
                 <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
@@ -560,6 +627,98 @@ export default function AddContentForm({ onSuccess }) {
                   <p className="text-sm text-gray-700">{contentData.descriptionEn}</p>
                 </div>
               )}
+            </div>
+
+            <div>
+              <label className="block mb-2 font-semibold text-gray-700">
+                📝 Nội dung đánh giá chi tiết (Review Content)
+              </label>
+              
+              {/* AI Generate Button */}
+              <div className="mb-3 flex gap-2">
+                <button
+                  type="button"
+                  onClick={generateAIReviewContent}
+                  disabled={generatingAI || !contentData.title}
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-lg transition-all shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {generatingAI ? (
+                    <>
+                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                      <span>AI đang viết...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>🤖</span>
+                      <span>Tạo nội dung tự động bằng AI</span>
+                    </>
+                  )}
+                </button>
+                
+                {contentData.reviewContent && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (window.confirm('⚠️ Bạn có chắc muốn xóa nội dung hiện tại?')) {
+                        setContentData({...contentData, reviewContent: ''})
+                      }
+                    }}
+                    className="px-4 py-2 bg-red-100 hover:bg-red-200 text-red-700 font-medium rounded-lg transition-colors"
+                  >
+                    🗑️ Xóa nội dung
+                  </button>
+                )}
+              </div>
+              
+              <div className="mb-2 p-3 bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg border border-purple-200">
+                <p className="text-sm text-purple-800">
+                  <span className="font-semibold">✨ Tính năng mới:</span> AI sẽ viết review tự nhiên, thân thiện như người miền Tây nói chuyện. Bạn có thể chỉnh sửa sau khi AI tạo xong!
+                </p>
+              </div>
+              
+              <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+                <ReactQuill
+                  theme="snow"
+                  value={contentData.reviewContent || ''}
+                  onChange={(value) => setContentData({...contentData, reviewContent: value})}
+                  modules={{
+                    toolbar: [
+                      [{ 'header': [1, 2, 3, false] }],
+                      ['bold', 'italic', 'underline', 'strike'],
+                      [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                      [{ 'color': [] }, { 'background': [] }],
+                      ['link', 'image'],
+                      ['clean']
+                    ]
+                  }}
+                  formats={[
+                    'header',
+                    'bold', 'italic', 'underline', 'strike',
+                    'list', 'bullet',
+                    'color', 'background',
+                    'link', 'image'
+                  ]}
+                  placeholder="Viết đánh giá chi tiết về phim/phim bộ...
+
+Gợi ý nội dung:
+• Cốt truyện và điểm nổi bật
+• Diễn xuất và nhân vật
+• Kỹ thuật (hình ảnh, âm thanh, dựng phim)
+• Thông điệp và ý nghĩa
+• Đánh giá tổng quan
+
+Hoặc click nút 'Tạo nội dung tự động bằng AI' ở trên để AI viết giúp bạn!"
+                  style={{ height: '400px' }}
+                />
+              </div>
+              <div className="mt-16 flex items-center justify-between">
+                <p className="text-xs text-gray-500">
+                  💡 Nội dung này sẽ hiển thị như blog chuyên nghiệp. Viết ít nhất 300-500 từ để tối ưu SEO.
+                </p>
+                <span className="text-xs text-gray-600 font-mono">
+                  {contentData.reviewContent?.replace(/<[^>]*>/g, '').length || 0} ký tự
+                </span>
+              </div>
             </div>
             
             <div className="grid grid-cols-3 gap-4">
@@ -636,7 +795,7 @@ export default function AddContentForm({ onSuccess }) {
           
           <div className="mb-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-sm text-blue-800">
-              <span className="font-semibold">💡 Gợi ý:</span> Chọn 3-10 video reviews chất lượng cao từ các reviewer uy tín
+              <span className="font-semibold">💡 Gợi ý:</span> Video review là tùy chọn. Bạn có thể bỏ qua và chỉ viết nội dung đánh giá chi tiết.
             </p>
           </div>
           
@@ -807,7 +966,7 @@ export default function AddContentForm({ onSuccess }) {
                 ) : selectedVideos.length > 0 ? (
                   `✓ Lưu nội dung (${selectedVideos.length} video)`
                 ) : (
-                  '✓ Lưu nội dung (không có video)'
+                  '✓ Lưu nội dung (không có video - OK)'
                 )}
               </button>
             </div>

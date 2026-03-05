@@ -32,9 +32,12 @@ export default function AffiliateLinks({ content, compact = false }) {
 
   if (compact) {
     return (
-      <div className="bg-gradient-to-r from-[#1a0a2e]/30 to-[#0f0520]/30 border border-[#2a1a4e]/30 rounded-lg p-4">
-        <p className="text-gray-300 text-sm text-center mb-3">
-          Xem chất lượng cao trên
+      <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-lg p-4">
+        <p className="text-purple-200 text-sm font-medium text-center mb-1">
+          🎬 Xem ở đâu?
+        </p>
+        <p className="text-gray-400 text-xs text-center mb-3">
+          Các nền tảng streaming chính thức
         </p>
         <div className="flex justify-center gap-3">
           {streamingPlatforms.map((platform) => (
@@ -44,7 +47,7 @@ export default function AffiliateLinks({ content, compact = false }) {
               target="_blank"
               rel="noopener noreferrer sponsored"
               className="bg-white/10 backdrop-blur-sm rounded-lg p-2 hover:bg-white/20 hover:scale-105 transition-all duration-300 border border-white/10"
-              title={platform.name}
+              title={`Xem trên ${platform.name}`}
             >
               <div className="relative w-12 h-12 flex items-center justify-center">
                 <Image
@@ -65,9 +68,12 @@ export default function AffiliateLinks({ content, compact = false }) {
   return (
     <div className="mt-6 space-y-4">
       {/* Heading */}
-      <div>
-        <p className="text-sm text-gray-300 text-center leading-relaxed">
-          Bạn có thể trải nghiệm phim chân thực hơn với các nền tảng
+      <div className="bg-gradient-to-r from-purple-900/30 to-blue-900/30 border border-purple-500/30 rounded-lg p-3">
+        <p className="text-sm text-purple-200 text-center font-medium mb-1">
+          🎬 Xem ở đâu?
+        </p>
+        <p className="text-xs text-gray-400 text-center leading-relaxed">
+          Trải nghiệm phim chất lượng cao trên các nền tảng streaming chính thức
         </p>
       </div>
 
@@ -80,7 +86,7 @@ export default function AffiliateLinks({ content, compact = false }) {
             target="_blank"
             rel="noopener noreferrer sponsored"
             className="bg-white/10 backdrop-blur-sm rounded-lg p-4 hover:bg-white/20 hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl border border-white/10"
-            title={platform.name}
+            title={`Xem trên ${platform.name}`}
           >
             <div className="relative w-full h-12 flex items-center justify-center">
               <Image
@@ -97,7 +103,7 @@ export default function AffiliateLinks({ content, compact = false }) {
 
       {/* Disclaimer */}
       <p className="text-xs text-gray-500 text-center">
-        * Link liên kết - Hỗ trợ website
+        * Link liên kết hợp tác - Hỗ trợ duy trì website
       </p>
 
       {/* Google AdSense Below */}

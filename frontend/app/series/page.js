@@ -147,8 +147,8 @@ export default function SeriesPage() {
       <div className="flex-1 container mx-auto px-4 py-8">
         {/* Page Title */}
         <div className="mb-6">
-          <h1 className="text-4xl font-bold text-white mb-2">📚 Truyện</h1>
-          <p className="text-gray-400">Khám phá và đọc review các bộ truyện hay nhất</p>
+          <h1 className="text-4xl font-bold text-white mb-2">📺 Phim Bộ</h1>
+          <p className="text-gray-400">Khám phá và xem review các bộ phim bộ hay nhất</p>
         </div>
 
         {/* Filter Button */}
@@ -287,8 +287,8 @@ export default function SeriesPage() {
           </div>
         ) : contents.length === 0 ? (
           <div className="text-center py-20">
-            <div className="text-6xl mb-4 opacity-30">📚</div>
-            <p className="text-xl text-gray-400">Không tìm thấy truyện nào</p>
+            <div className="text-6xl mb-4 opacity-30">📺</div>
+            <p className="text-xl text-gray-400">Không tìm thấy phim bộ nào</p>
             <p className="text-gray-500 mt-2 text-sm">Hãy thử điều chỉnh bộ lọc</p>
           </div>
         ) : (
@@ -303,7 +303,7 @@ export default function SeriesPage() {
             {pagination && pagination.pages > 1 && (
               <div className="flex flex-col items-center gap-4 mt-8">
                 <div className="text-gray-400 text-sm">
-                  Trang {page} / {pagination.pages} ({pagination.total} truyện)
+                  Trang {page} / {pagination.pages} ({pagination.total} phim bộ)
                 </div>
                 <div className="flex items-center gap-2">
                   <button

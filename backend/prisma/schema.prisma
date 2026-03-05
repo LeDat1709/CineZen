@@ -13,6 +13,7 @@ model Content {
   slug          String    @unique
   type          String    @default("MOVIE")
   description   String?   @db.Text
+  reviewContent String?   @map("review_content") @db.Text
   posterUrl     String?   @map("poster_url")
   backdropUrl   String?   @map("backdrop_url")
   releaseYear   Int?      @map("release_year")
@@ -36,7 +37,7 @@ model Content {
 model Review {
   id             Int      @id @default(autoincrement())
   contentId      Int      @map("content_id")
-  youtubeVideoId String   @map("youtube_video_id")
+  youtubeVideoId String?  @map("youtube_video_id")
   reviewerName   String?  @map("reviewer_name")
   reviewSummary  String?  @db.Text @map("review_summary")
   viewCount      Int?     @default(0) @map("view_count")

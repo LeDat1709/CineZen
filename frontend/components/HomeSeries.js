@@ -42,9 +42,9 @@ export default function HomeSeries() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h2 className="text-2xl font-bold flex items-center gap-2">
-            📚 Truyện
+            📺 Phim Bộ
           </h2>
-          <p className="text-sm text-gray-400 mt-1">Review truyện hay, đọc là mê</p>
+          <p className="text-sm text-gray-400 mt-1">Review phim bộ hay, xem là mê</p>
         </div>
         <Link 
           href="/series" 
@@ -60,7 +60,7 @@ export default function HomeSeries() {
       {/* Top Rated Series */}
       <div className="mb-10">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-300">Top Truyện Hay Nhất</h3>
+          <h3 className="text-lg font-semibold text-gray-300">Top Phim Bộ Hay Nhất</h3>
           <Link 
             href="/series?sort=rating" 
             className="text-sm text-yellow-500 hover:text-yellow-400 transition-colors"
@@ -78,7 +78,7 @@ export default function HomeSeries() {
       {/* Latest Series */}
       <div>
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-gray-300">Truyện Mới Cập Nhật</h3>
+          <h3 className="text-lg font-semibold text-gray-300">Phim Bộ Mới Cập Nhật</h3>
           <Link 
             href="/series?sort=latest" 
             className="text-sm text-yellow-500 hover:text-yellow-400 transition-colors"

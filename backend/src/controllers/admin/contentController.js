@@ -1,6 +1,7 @@
 const { PrismaClient } = require('@prisma/client');
 const axios = require('axios');
 const slugify = require('slugify');
+const { generateReviewContent } = require('../../services/groqService');
 const prisma = new PrismaClient();
 
 // Country mapping helper
@@ -249,13 +250,16 @@ const createContent = async (req, res) => {
     const { 
       title, 
       type = 'MOVIE',
-      description, 
-      posterUrl, 
+      description,
+      reviewContent, // ADD THIS
+      posterUrl,
+      backdropUrl, // ADD THIS
       releaseYear, 
       genreIds = [], // Array of genre IDs
       rating,
       totalEpisodes,
-      status
+      status,
+      country // ADD THIS
     } = req.body;
     
     const slug = slugify(title, { lower: true, strict: true });
@@ -266,11 +270,14 @@ const createContent = async (req, res) => {
         slug,
         type: type.toUpperCase(),
         description,
+        reviewContent, // ADD THIS
         posterUrl,
+        backdropUrl, // ADD THIS
         releaseYear: releaseYear ? parseInt(releaseYear) : null,
         rating: rating ? parseFloat(rating) : null,
         totalEpisodes: totalEpisodes ? parseInt(totalEpisodes) : null,
         status: status || 'completed',
+        country, // ADD THIS
         genres: {
           create: genreIds.map(genreId => ({
             genre: {
@@ -284,7 +291,8 @@ const createContent = async (req, res) => {
           include: {
             genre: true
           }
-        }
+        },
+        reviews: true // ADD THIS
       }
     });
 
@@ -326,24 +334,30 @@ const updateContent = async (req, res) => {
     const { 
       title, 
       type,
-      description, 
+      description,
+      reviewContent, // ADD THIS
       posterUrl, 
+      backdropUrl, // ADD THIS
       releaseYear, 
       genreIds, // Array of genre IDs
       rating,
       totalEpisodes,
-      status
+      status,
+      country // ADD THIS
     } = req.body;
     
     const updateData = {
       ...(title && { title, slug: slugify(title, { lower: true, strict: true }) }),
       ...(type && { type: type.toUpperCase() }),
       ...(description !== undefined && { description }),
+      ...(reviewContent !== undefined && { reviewContent }), // ADD THIS
       ...(posterUrl !== undefined && { posterUrl }),
+      ...(backdropUrl !== undefined && { backdropUrl }), // ADD THIS
       ...(releaseYear && { releaseYear: parseInt(releaseYear) }),
       ...(rating !== undefined && { rating: rating ? parseFloat(rating) : null }),
       ...(totalEpisodes !== undefined && { totalEpisodes: totalEpisodes ? parseInt(totalEpisodes) : null }),
-      ...(status && { status })
+      ...(status && { status }),
+      ...(country !== undefined && { country }) // ADD THIS
     };
 
     // Update genres if provided
@@ -373,7 +387,8 @@ const updateContent = async (req, res) => {
           include: {
             genre: true
           }
-        }
+        },
+        reviews: true // ADD THIS to return reviews
       }
     });
 
@@ -416,6 +431,47 @@ const addReviewToContent = async (req, res) => {
   }
 };
 
+// Generate AI review content using Groq
+const generateAIReview = async (req, res) => {
+  try {
+    const { title, type, description, releaseYear, genres, rating, country } = req.body;
+    
+    if (!title) {
+      return res.status(400).json({ error: 'Title is required' });
+    }
+    
+    console.log('🤖 Generating AI review for:', title);
+    
+    const result = await generateReviewContent({
+      title,
+      type: type || 'MOVIE',
+      description,
+      releaseYear,
+      genres,
+      rating,
+      country
+    });
+    
+    if (result.success) {
+      console.log('✅ AI review generated successfully');
+      res.json({
+        success: true,
+        content: result.content,
+        wordCount: result.wordCount
+      });
+    } else {
+      console.error('❌ AI review generation failed:', result.error);
+      res.status(500).json({
+        success: false,
+        error: result.error
+      });
+    }
+  } catch (error) {
+    console.error('❌ Error in generateAIReview:', error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 module.exports = {
   fetchContentFromOMDB,
   searchYouTubeVideos,
@@ -423,5 +479,6 @@ module.exports = {
   getContentById,
   updateContent,
   deleteContent,
-  addReviewToContent
+  addReviewToContent,
+  generateAIReview
 };

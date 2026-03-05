@@ -113,7 +113,7 @@ export default function GenreManager() {
             filter === 'SERIES' ? 'bg-purple-600 text-white' : 'bg-gray-200'
           }`}
         >
-          📚 Truyện
+          📺 Phim Bộ
         </button>
       </div>
 
@@ -141,7 +141,7 @@ export default function GenreManager() {
                 className="w-full px-4 py-2 border rounded"
               >
                 <option value="MOVIE">Phim</option>
-                <option value="SERIES">Truyện</option>
+                <option value="SERIES">Phim Bộ</option>
               </select>
             </div>
             <div className="flex gap-2">
@@ -186,7 +186,7 @@ export default function GenreManager() {
                   <span className={`px-2 py-1 rounded text-xs ${
                     genre.forType === 'MOVIE' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'
                   }`}>
-                    {genre.forType === 'MOVIE' ? 'Phim' : 'Truyện'}
+                    {genre.forType === 'MOVIE' ? 'Phim' : 'Phim Bộ'}
                   </span>
                 </td>
                 <td className="px-6 py-4 text-right space-x-2">

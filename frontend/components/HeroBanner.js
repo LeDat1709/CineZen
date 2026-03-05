@@ -107,19 +107,19 @@ export default function HeroBanner() {
             </p>
           )}
 
-          {/* Action Buttons - No Icons */}
+          {/* Action Buttons - Updated for legal compliance */}
           <div className="flex gap-4">
             <Link
               href={`/contents/${current.slug}`}
               className="bg-gradient-to-r from-yellow-500 to-yellow-600 hover:from-yellow-600 hover:to-yellow-700 text-black font-bold px-10 py-4 rounded-lg transition-all hover:scale-105 shadow-lg"
             >
-              Xem ngay
+              Xem đánh giá chi tiết
             </Link>
             <Link
               href={`/contents/${current.slug}`}
               className="bg-white/10 backdrop-blur-sm hover:bg-white/20 text-white font-semibold px-10 py-4 rounded-lg transition-all border border-white/30"
             >
-              Chi tiết
+              Xem Trailer
             </Link>
           </div>
         </div>
