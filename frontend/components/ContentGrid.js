@@ -75,7 +75,7 @@ export default function ContentGrid({ type = null }) {
                 : 'text-gray-400 hover:text-white hover:bg-gray-800'
             }`}
           >
-            Truyện
+            Phim Bộ
           </button>
         </div>
       )}

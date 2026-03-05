@@ -7,7 +7,8 @@ const {
   getContentById,
   updateContent,
   deleteContent,
-  addReviewToContent
+  addReviewToContent,
+  generateAIReview
 } = require('../../controllers/admin/contentController');
 
 const router = express.Router();
@@ -181,5 +182,43 @@ router.delete('/contents/:id', deleteContent);
  *         description: Thêm thành công
  */
 router.post('/reviews', addReviewToContent);
+
+/**
+ * @swagger
+ * /api/admin/generate-ai-review:
+ *   post:
+ *     summary: Tạo nội dung review tự động bằng AI (Groq)
+ *     tags: [Admin]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               title:
+ *                 type: string
+ *               type:
+ *                 type: string
+ *                 enum: [MOVIE, SERIES]
+ *               description:
+ *                 type: string
+ *               releaseYear:
+ *                 type: integer
+ *               genres:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *               rating:
+ *                 type: number
+ *               country:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Nội dung review được tạo thành công
+ */
+router.post('/generate-ai-review', generateAIReview);
 
 module.exports = router;

@@ -1,6 +1,6 @@
 -- CineZen Database Schema
 -- PostgreSQL
--- Hỗ trợ cả Phim (MOVIE) và Truyện (SERIES)
+-- Hỗ trợ cả Phim (MOVIE) và Phim bộ (SERIES)
 -- Đồng bộ với Prisma Schema
 
 -- ============================================
@@ -28,13 +28,15 @@ CREATE TABLE tags (
     slug VARCHAR(100) UNIQUE NOT NULL
 );
 
--- Bảng Contents (Phim và Truyện)
+-- Bảng Contents (Phim và Phim bộ)
+-- type: 'MOVIE' = Phim lẻ, 'SERIES' = Phim bộ/TV Series
 CREATE TABLE contents (
     id SERIAL PRIMARY KEY,
     title VARCHAR(255) NOT NULL,
     slug VARCHAR(255) UNIQUE NOT NULL,
     type VARCHAR(20) DEFAULT 'MOVIE',
     description TEXT,
+    review_content TEXT,
     poster_url VARCHAR(500),
     backdrop_url VARCHAR(500),
     release_year INTEGER,
@@ -54,11 +56,11 @@ CREATE INDEX idx_contents_slug ON contents(slug);
 CREATE INDEX idx_contents_type ON contents(type);
 CREATE INDEX idx_contents_country ON contents(country);
 
--- Bảng Reviews (Video review từ YouTube)
+-- Bảng Reviews (Video review từ YouTube - Optional)
 CREATE TABLE reviews (
     id SERIAL PRIMARY KEY,
     content_id INTEGER NOT NULL REFERENCES contents(id) ON DELETE CASCADE,
-    youtube_video_id VARCHAR(20) NOT NULL,
+    youtube_video_id VARCHAR(20),
     reviewer_name VARCHAR(255),
     review_summary TEXT,
     view_count INTEGER DEFAULT 0,
@@ -138,18 +140,27 @@ INSERT INTO genres (name, slug, for_type) VALUES
     ('Chiến tranh', 'chien-tranh', 'MOVIE')
 ON CONFLICT (slug) DO NOTHING;
 
--- Thể loại Truyện
+-- Thể loại Phim bộ (TV Series)
 INSERT INTO genres (name, slug, for_type) VALUES
-    ('Tiên hiệp', 'tien-hiep', 'SERIES'),
-    ('Huyền huyễn', 'huyen-huyen', 'SERIES'),
-    ('Đô thị', 'do-thi', 'SERIES'),
-    ('Lịch sử', 'lich-su', 'SERIES'),
-    ('Võng du', 'vong-du', 'SERIES'),
-    ('Khoa huyễn', 'khoa-huyen', 'SERIES'),
-    ('Đam mỹ', 'dam-my', 'SERIES'),
-    ('Ngôn tình', 'ngon-tinh', 'SERIES'),
-    ('Huyền ảo', 'huyen-ao', 'SERIES'),
-    ('Kiếm hiệp', 'kiem-hiep', 'SERIES')
+    ('Hành động', 'hanh-dong-series', 'SERIES'),
+    ('Phiêu lưu', 'phieu-luu-series', 'SERIES'),
+    ('Hoạt hình', 'hoat-hinh-series', 'SERIES'),
+    ('Hài', 'hai-series', 'SERIES'),
+    ('Tội phạm', 'toi-pham-series', 'SERIES'),
+    ('Tài liệu', 'tai-lieu-series', 'SERIES'),
+    ('Chính kịch', 'chinh-kich-series', 'SERIES'),
+    ('Gia đình', 'gia-dinh-series', 'SERIES'),
+    ('Giả tưởng', 'gia-tuong-series', 'SERIES'),
+    ('Kinh dị', 'kinh-di-series', 'SERIES'),
+    ('Bí ẩn', 'bi-an-series', 'SERIES'),
+    ('Lãng mạn', 'lang-man-series', 'SERIES'),
+    ('Khoa học viễn tưởng', 'khoa-hoc-vien-tuong-series', 'SERIES'),
+    ('Gây cấn', 'gay-can-series', 'SERIES'),
+    ('Chiến tranh', 'chien-tranh-series', 'SERIES'),
+    ('Sitcom', 'sitcom', 'SERIES'),
+    ('Anime', 'anime', 'SERIES'),
+    ('Reality Show', 'reality-show', 'SERIES'),
+    ('Talk Show', 'talk-show', 'SERIES')
 ON CONFLICT (slug) DO NOTHING;
 
 -- ============================================

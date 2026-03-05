@@ -23,7 +23,7 @@ export default function GenreCategories() {
       const seriesData = await seriesRes.json()
 
       setMovieGenres(movieData.slice(0, 6)) // Lấy 6 thể loại phim
-      setSeriesGenres(seriesData.slice(0, 6)) // Lấy 6 thể loại truyện
+      setSeriesGenres(seriesData.slice(0, 6)) // Lấy 6 thể loại phim bộ
     } catch (error) {
       console.error('Error:', error)
     } finally {
@@ -68,7 +68,7 @@ export default function GenreCategories() {
 
       {/* Series Genres */}
       <div>
-        <h3 className="text-sm text-gray-400 mb-3 uppercase tracking-wide">Truyện</h3>
+        <h3 className="text-sm text-gray-400 mb-3 uppercase tracking-wide">Phim Bộ</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
           {seriesGenres.map((genre, index) => (
             <Link

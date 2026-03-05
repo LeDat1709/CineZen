@@ -95,11 +95,10 @@ export default function Header() {
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-3">
             <img 
-              src="https://cdzhcgozjilldlpngapi.supabase.co/storage/v1/object/public/Image/Logo/logonew.png" 
-              alt="ReviewPhim Logo" 
+              src="https://kwseglsgutzjfluiypiy.supabase.co/storage/v1/object/public/Image/logonew.png" 
+              alt="CineZen Logo" 
               className="h-10 w-auto"
             />
-            <span className="text-xs text-gray-500">Review hay & chill</span>
           </Link>
 
           {/* Navigation */}
@@ -111,7 +110,7 @@ export default function Header() {
               Phim Lẻ
             </Link>
             <Link href="/series" className="text-gray-300 hover:text-white transition-colors text-sm">
-              Truyện
+              Phim Bộ
             </Link>
             
             {/* Genre Mega Menu */}
@@ -152,7 +151,7 @@ export default function Header() {
                     {/* Series Genres */}
                     <div>
                       <h3 className="text-white font-bold mb-3 pb-2 border-b border-gray-700">
-                        📚 Truyện
+                        📺 Phim Bộ
                       </h3>
                       <div className="grid grid-cols-2 gap-x-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                         {seriesGenres.map(genre => (

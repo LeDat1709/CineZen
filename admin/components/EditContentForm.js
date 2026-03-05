@@ -1,12 +1,18 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import dynamic from 'next/dynamic'
+import 'react-quill/dist/quill.snow.css'
+
+// Import React Quill dynamically to avoid SSR issues
+const ReactQuill = dynamic(() => import('react-quill'), { ssr: false })
 
 export default function EditContentForm({ contentId, onSuccess }) {
   const [formData, setFormData] = useState({
     title: '',
     type: 'MOVIE',
     description: '',
+    reviewContent: '',
     posterUrl: '',
     releaseYear: '',
     rating: '',
@@ -43,6 +49,7 @@ export default function EditContentForm({ contentId, onSuccess }) {
         title: data.title || '',
         type: data.type || 'MOVIE',
         description: data.description || '',
+        reviewContent: data.reviewContent || '',
         posterUrl: data.posterUrl || '',
         releaseYear: data.releaseYear || '',
         rating: data.rating || '',
@@ -242,7 +249,7 @@ export default function EditContentForm({ contentId, onSuccess }) {
                 }}
                 className="mr-2"
               />
-              Truyện/Series
+              Phim Bộ
             </label>
           </div>
         </div>
@@ -319,7 +326,7 @@ export default function EditContentForm({ contentId, onSuccess }) {
             )}
           </div>
           <p className="text-sm text-gray-500 mt-1">
-            Hiển thị thể loại cho: {formData.type === 'MOVIE' ? '🎬 Phim' : '📚 Truyện'}
+            Hiển thị thể loại cho: {formData.type === 'MOVIE' ? '🎬 Phim' : '📺 Phim Bộ'}
           </p>
           {selectedGenres.length > 0 && (
             <p className="text-sm text-blue-600 mt-1">
@@ -330,12 +337,54 @@ export default function EditContentForm({ contentId, onSuccess }) {
 
         {/* Description */}
         <div>
-          <label className="block mb-2 font-semibold">Mô tả</label>
+          <label className="block mb-2 font-semibold">Mô tả ngắn</label>
           <textarea
             value={formData.description}
             onChange={(e) => setFormData({...formData, description: e.target.value})}
-            className="w-full px-4 py-2 border rounded h-32"
+            className="w-full px-4 py-2 border rounded h-24"
+            placeholder="Mô tả ngắn gọn (2-3 câu)"
           />
+        </div>
+
+        {/* Review Content - Rich Text Editor */}
+        <div>
+          <label className="block mb-2 font-semibold">
+            📝 Nội dung đánh giá chi tiết
+          </label>
+          <div className="bg-white border-2 border-gray-300 rounded-lg overflow-hidden">
+            <ReactQuill
+              theme="snow"
+              value={formData.reviewContent || ''}
+              onChange={(value) => setFormData({...formData, reviewContent: value})}
+              modules={{
+                toolbar: [
+                  [{ 'header': [1, 2, 3, false] }],
+                  ['bold', 'italic', 'underline', 'strike'],
+                  [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                  [{ 'color': [] }, { 'background': [] }],
+                  ['link', 'image'],
+                  ['clean']
+                ]
+              }}
+              formats={[
+                'header',
+                'bold', 'italic', 'underline', 'strike',
+                'list', 'bullet',
+                'color', 'background',
+                'link', 'image'
+              ]}
+              placeholder="Viết đánh giá chi tiết..."
+              style={{ height: '400px' }}
+            />
+          </div>
+          <div className="mt-16 flex items-center justify-between">
+            <p className="text-xs text-gray-500">
+              💡 Format text, thêm ảnh, tạo danh sách như Word
+            </p>
+            <span className="text-xs text-gray-600">
+              {formData.reviewContent?.replace(/<[^>]*>/g, '').length || 0} ký tự
+            </span>
+          </div>
         </div>
 
         {/* Year, Country and Rating */}
